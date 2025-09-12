@@ -160,7 +160,7 @@ function determineFileName(frame, batch, side){
 function prepareTweetText(side, frame, totalFrame){
     logger("start", "prepareTweetText");
     var tweetText = FILM_TITLE;
-    tweetText += " - " + side + " Frame "+ frame + " of " + totalFrame;
+    tweetText += " - " + side + " - Frame "+ frame + " of " + totalFrame;
     logger("finish", "prepareTweetText");
     return tweetText;
 
