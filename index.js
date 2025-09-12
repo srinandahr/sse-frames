@@ -1,9 +1,9 @@
 //Imports
 import { TwitterApi } from "twitter-api-v2";
-import dotenv from 'dotenv';
+// import dotenv from 'dotenv';
 
 //Environment & API Configs
-dotenv.config();
+// dotenv.config();
 
 const client = new TwitterApi({
       appKey: process.env.TWITTER_API_KEY,
