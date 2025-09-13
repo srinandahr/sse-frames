@@ -20,7 +20,7 @@ const SIDE_A_MAX_FRAME = 8410;
 const SIDE_B_MAX_FRAME = 8735;
 const FILM_TITLE = "Sapta Saagaradaache Ello";
 const FILE_TYPE = ".png";
-const MAX_TWEET = 5;
+const MAX_TWEET = 2;
 var tweetIndex = 0;
 
 //This function gets the last tweet posted
@@ -80,7 +80,7 @@ function determineFrame(previousTweet){
     var frame = 1;
     if(isNotNull(previousTweet)){
         var previousFrame = parseInt(previousTweet.split("Frame")[1].split("of")[0].trim() ,10);
-        frame = previousFrame++;
+        frame = previousFrame + 1
     }
     logger("finish", "determineFrame");
     return frame;
