@@ -20,11 +20,11 @@ jobs:
       - name: Install dependencies
         run: npm install
 
-      - name: Download last tweet
-        uses: actions/download-artifact@v4
-        with:
-          name: last-tweet
-          path: .
+      # - name: Download last tweet
+      #   uses: actions/download-artifact@v4
+      #   with:
+      #     name: last-tweet
+      #     path: .
 
       - name: Run bot
         run: node index.js
