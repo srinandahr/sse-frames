@@ -1,10 +1,25 @@
 //Imports
 import { TwitterApi } from "twitter-api-v2";
-import fs from "fs";
-// import dotenv from 'dotenv';
+import { google } from "googleapis";
+import dotenv from 'dotenv';
 
 //Environment & API Configs
-// dotenv.config();
+dotenv.config();
+
+const credentials = JSON.parse(process.env.GOOGLE_CREDS_JSON);
+
+const auth = new google.auth.GoogleAuth({
+  credentials: {
+    client_email: credentials.client_email,
+    private_key: credentials.private_key,
+  },
+  scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+});
+
+const sheets = google.sheets({ version: "v4", auth });
+
+const SPREADSHEET_ID = process.env.SPREADSHEET_ID;
+const RANGE = "Sheet1!A2";
 
 const client = new TwitterApi({
       appKey: process.env.TWITTER_API_KEY,
@@ -24,14 +39,16 @@ const FILE_TYPE = ".png";
 const MAX_TWEET = 2;
 var tweetIndex = 0;
 
-//This function gets the last tweet posted
-function getLastTweetText(){
+//This function gets the last tweet cached
+async function getLastTweetText(){
     logger("start", "getLastTweetText");
-    if (fs.existsSync("lastTweet.json")) {
-    const data = JSON.parse(fs.readFileSync("lastTweet.json", "utf-8"));
-    console.log("Last tweet ID was:", data.lastTweet);
-    }
+    const res = await sheets.spreadsheets.values.get({
+        spreadsheetId: SPREADSHEET_ID,
+        range: RANGE,
+    });
+    const rows = res.data.values;
     logger("finish", "getLastTweetText");
+    return rows && rows[0] ? rows[0][0] : null;
 }
 
 //Main Function
@@ -56,7 +73,7 @@ async function main(){
                     media: { media_ids: [mediaId] },
                 });
                 console.log("Posted Successfully!", tweetText);  
-                cacheLastTweet(tweetText);
+                await cacheLastTweet(tweetText);
             }
             tweetIndex++;
             frame++;
@@ -160,9 +177,16 @@ function prepareTweetText(side, frame, totalFrame){
 }
 
 //This function caches the last tweet posted
-function cacheLastTweet(tweetText){
+async function cacheLastTweet(tweetText){
     logger("start", "cacheLastTweet");
-    fs.writeFileSync("lastTweet.json", JSON.stringify({ lastTweet: tweetText }, null, 2));
+    await sheets.spreadsheets.values.update({
+        spreadsheetId: SPREADSHEET_ID,
+        range: RANGE,
+        valueInputOption: "RAW",
+        requestBody: {
+            values: [[tweetText]],
+        },
+    });
     logger("finish", "cacheLastTweet");
 }
 
@@ -179,4 +203,4 @@ function logger(type, functionName){
 }
 
 //Main function call
-main();
+main()
