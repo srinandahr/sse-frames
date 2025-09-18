@@ -1,5 +1,6 @@
 //Imports
 import { TwitterApi } from "twitter-api-v2";
+import fs from "fs";
 // import dotenv from 'dotenv';
 
 //Environment & API Configs
@@ -24,22 +25,13 @@ const MAX_TWEET = 2;
 var tweetIndex = 0;
 
 //This function gets the last tweet posted
-async function getLastTweetText(){
+function getLastTweetText(){
     logger("start", "getLastTweetText");
-    var previousTweetText = "";
-    try{
-        const user = await rwClient.v2.userByUsername("SSE_Frames");
-        const tweets = await rwClient.v2.userTimeline(user.data.id, {
-            max_results: 5,
-            exclude: "replies",
-        });
-        previousTweetText = tweets.data.data?.[0].text;
-        console.log("previousTweetText", previousTweetText);
-    }catch(e){
-        console.log("Error", e);
+    if (fs.existsSync("lastTweet.json")) {
+    const data = JSON.parse(fs.readFileSync("lastTweet.json", "utf-8"));
+    console.log("Last tweet ID was:", data.lastTweet);
     }
     logger("finish", "getLastTweetText");
-    return previousTweetText;
 }
 
 //Main Function
@@ -64,6 +56,7 @@ async function main(){
                     media: { media_ids: [mediaId] },
                 });
                 console.log("Posted Successfully!", tweetText);  
+                cacheLastTweet(tweetText);
             }
             tweetIndex++;
             frame++;
@@ -99,7 +92,7 @@ function determineBatch(frame){
     return batch;
 }
 
-//This function determines whixh Side the frame belongs
+//This function determines which Side the frame belongs
 function determineSide(frame){
     logger("start", "determineSide");
     var side = "Side A";
@@ -166,6 +159,13 @@ function prepareTweetText(side, frame, totalFrame){
 
 }
 
+//This function caches the last tweet posted
+function cacheLastTweet(tweetText){
+    logger("start", "cacheLastTweet");
+    fs.writeFileSync("lastTweet.json", JSON.stringify({ lastTweet: tweetText }, null, 2));
+    logger("finish", "cacheLastTweet");
+}
+
 //Utility function to check the null value
 function isNotNull(value){
     if(value != "" && value != undefined && value != null)
@@ -173,6 +173,7 @@ function isNotNull(value){
     else
         return false;
 }
+//Utility function to log before and after function execution
 function logger(type, functionName){
     console.log("Function "+functionName+" "+type);
 }
