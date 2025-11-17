@@ -102,7 +102,8 @@ function determineBatch(frame){
     var batch = "batch_1";
     if(isNotNull(frame)){
         var batchNum = Math.trunc(frame/1000);
-        batchNum++;
+        if(frame%1000 != 0)
+          batchNum++;
         batch = "batch_"+ batchNum;
     }
     logger("finish", "determineBatch");
